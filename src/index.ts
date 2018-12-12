@@ -1,46 +1,41 @@
-import Cheerio from "cheerio";
-import Request from "request";
+import dotenv from "dotenv";
+dotenv.config();
 
+import { Options } from "graphql-yoga";
+import { createConnection } from "typeorm";
+import app from "./app";
+import connectionOptions from "./ormConfig";
+import decodeJWT from "./utils/decodeJWT";
 
-const kisa_url = "https://www.krcert.or.kr/data/secNoticeList.do";
-Request(kisa_url, (error, response, html) => {
-    if(error) {
-        throw error;
-    }
+const PORT : number | string = process.env.PORT || 4000;
+const PLAYGROUND_ENDPOINT : string = "/playground";
+const GRAPHQL_ENDPOINT : string = "/graphql";
+const SUBSCRIPTION_ENDPOINT: string = "/subscription";
 
-    const load_html = Cheerio.load(html);
-    let nth:any = null;
-
-    load_html("#contentDiv > table > tbody > tr > td.colTit > a").each((n) => {
-        nth = n + 1;
-        console.log(
-            load_html("#contentDiv > table > tbody > tr:nth-child("+ (<String>nth) +") > td.colTit > a"
-            ).text(),
-            load_html("#contentDiv > table > tbody > tr:nth-child("+ (<String>nth) +") > td.colTit > a"
-            ).attr("href"),
-            load_html("#contentDiv > table > tbody > tr:nth-child("+ (<String>nth) +") > td:nth-child(5)"
-            ).text()
-        );
-    });
-});
-
-const kfisac_url = "https://www.kfisac.or.kr/ContentsPage.doj"
-Request.post(kfisac_url, { headers: { "Cookie":""
-    }}, (error, response, html) => {
-        if(error) {
-            throw error;
+const appOptions : Options = {
+    port: PORT,
+    playground: PLAYGROUND_ENDPOINT,
+    endpoint: GRAPHQL_ENDPOINT,
+    subscriptions: {
+        path: SUBSCRIPTION_ENDPOINT,
+        onConnect: async connectionParams => {
+            const token = connectionParams['X-JWT']
+            if (token) {
+                const user = await decodeJWT(token);
+                if (user) {
+                    return {
+                        currentUser: user
+                    };
+                }
+            }
+            throw new Error("no JWT. Can't subscribe");
         }
-        
-        const load_html = Cheerio.load(html);
-        let nth:any = null;
-
-        load_html("#BdList-Type01 > tbody > tr > td.left > a").each((n) => {
-            nth = n + 1;
-            console.log(nth);
-            console.log(
-                load_html("#BdList-Type01 > tbody > tr:nth-child("+ (<String>nth) +") > td.left > a"
-                ).text()
-            );
-        });
     }
-);
+};
+
+const handleAppStart = () => console.log(`Listening on port ${PORT}`);
+
+createConnection(connectionOptions).then(() => {
+    app.start(appOptions, handleAppStart);
+})
+    .catch(error => console.log(error));
