@@ -12,8 +12,7 @@ const resolvers: Resolvers = {
             _,
             args: EmailSignUpMutationArgs
         ): Promise<EmailSignUpResponse> => {
-            //const { email } = args;
-           /*
+            const { email } = args;
             try {
                 const existingUser = await User.findOne({ email });
                 if(existingUser) {
@@ -25,7 +24,6 @@ const resolvers: Resolvers = {
                         token
                     };
                 } else {
-                    */
                     const newUser = await User.create({...args}).save();
                     const token = createJWT(newUser.id);
 
@@ -34,7 +32,6 @@ const resolvers: Resolvers = {
                         error: null,
                         token
                     };
-                    /*
                 }
             } catch (error) {
                 return {
@@ -43,7 +40,6 @@ const resolvers: Resolvers = {
                     token: null
                 };
             }
-            */
         }
     }
 };
