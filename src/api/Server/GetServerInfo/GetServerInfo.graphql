@@ -1,0 +1,9 @@
+type GetServerInfoResponse {
+    ok: Boolean!
+    error: String
+    server: Server
+}
+
+type Query {
+    GetServerInfo: GetServerInfoResponse!
+}

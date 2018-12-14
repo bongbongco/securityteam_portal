@@ -1,6 +1,6 @@
 type Server {
     id: Int!
-    host: String
+    host: String!
     ip: String!
     explanation: String
     vendor: String
