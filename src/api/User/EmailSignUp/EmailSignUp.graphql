@@ -6,7 +6,7 @@ type EmailSignUpResponse {
 
 type Mutation {
     EmailSignUp(
-        firstName: String!
+        firstName: String!,
         lastName: String!,
         email: String!,
         password: String!,
