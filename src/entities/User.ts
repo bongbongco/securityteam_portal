@@ -16,7 +16,8 @@ const BCRYPT_ROUNDS = 10;
 @Entity()
 class User extends BaseEntity {
 
-    @PrimaryGeneratedColumn() id: number;
+    @PrimaryGeneratedColumn() 
+    id: number;
 
     @Column({
         type: "text",
